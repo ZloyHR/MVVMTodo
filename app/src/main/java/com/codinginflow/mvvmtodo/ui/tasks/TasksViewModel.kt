@@ -8,9 +8,11 @@ import com.codinginflow.mvvmtodo.data.PreferencesManager
 import com.codinginflow.mvvmtodo.data.SortOrder
 import com.codinginflow.mvvmtodo.data.Task
 import com.codinginflow.mvvmtodo.data.TaskDao
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class TasksViewModel @ViewModelInject constructor(
@@ -45,6 +47,23 @@ class TasksViewModel @ViewModelInject constructor(
 
     fun onTaskCheckedChanged(task: Task, checked: Boolean) = viewModelScope.launch {
         taskDao.update(task.copy(isDone = checked))
+    }
+
+
+    private val tasksEventChannel = Channel<TasksEvent>()
+    val taskEvent = tasksEventChannel.receiveAsFlow()
+
+    fun onTaskSwiped(task: Task) = viewModelScope.launch {
+        taskDao.delete(task)
+        tasksEventChannel.send(TasksEvent.ShowUndoDeleteTaskMessage(task))
+    }
+
+    fun onTaskUndoClicked(task: Task) = viewModelScope.launch {
+        taskDao.insert(task)
+    }
+
+    sealed class TasksEvent(){
+        data class ShowUndoDeleteTaskMessage(val task: Task) : TasksEvent()
     }
 
 }
