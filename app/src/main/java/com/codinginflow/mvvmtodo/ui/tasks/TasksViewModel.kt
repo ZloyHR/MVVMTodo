@@ -7,6 +7,8 @@ import com.codinginflow.mvvmtodo.data.PreferencesManager
 import com.codinginflow.mvvmtodo.data.SortOrder
 import com.codinginflow.mvvmtodo.data.Task
 import com.codinginflow.mvvmtodo.data.TaskDao
+import com.codinginflow.mvvmtodo.ui.ACTION_ADD_OK
+import com.codinginflow.mvvmtodo.ui.ACTION_EDIT_OK
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
@@ -65,8 +67,16 @@ class TasksViewModel @ViewModelInject constructor(
         tasksEventChannel.send(TasksEvent.NavigateToAddTaskScreen)
     }
 
+    fun onAddEditResult(res: Int) = viewModelScope.launch {
+        when(res){
+            ACTION_ADD_OK -> tasksEventChannel.send(TasksEvent.ShowSavedMessage("Task added"))
+            ACTION_EDIT_OK -> tasksEventChannel.send(TasksEvent.ShowSavedMessage("Task saved"))
+        }
+    }
+
     sealed class TasksEvent(){
         data class ShowUndoDeleteTaskMessage(val task: Task) : TasksEvent()
+        data class ShowSavedMessage(val msg: String) : TasksEvent()
         data class NavigateToEditTaskScreen(val task: Task) : TasksEvent()
         object NavigateToAddTaskScreen : TasksEvent()
     }

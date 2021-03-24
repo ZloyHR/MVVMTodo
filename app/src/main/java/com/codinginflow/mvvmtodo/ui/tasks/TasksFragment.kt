@@ -7,6 +7,7 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -17,6 +18,7 @@ import com.codinginflow.mvvmtodo.R
 import com.codinginflow.mvvmtodo.data.SortOrder
 import com.codinginflow.mvvmtodo.data.Task
 import com.codinginflow.mvvmtodo.databinding.FragmentTaskListBinding
+import com.codinginflow.mvvmtodo.utils.exhaustive
 import com.codinginflow.mvvmtodo.utils.onQueryTextChanged
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
@@ -82,8 +84,17 @@ class TasksFragment : Fragment(R.layout.fragment_task_list),TasksAdapter.OnItemC
                         val action = TasksFragmentDirections.actionTasksFragmentToAddEditTaskFragment(event.task,"Edit Task")
                         findNavController().navigate(action)
                     }
-                }
+                    is TasksViewModel.TasksEvent.ShowSavedMessage -> {
+                        Snackbar.make(requireView(),event.msg,Snackbar.LENGTH_LONG).show()
+                    }
+                }.exhaustive
             }
+        }
+
+
+        setFragmentResultListener("add_edit_result"){ _, bundle ->
+            val res = bundle.getInt("add_edit_result")
+            viewModel.onAddEditResult(res)
         }
 
         setHasOptionsMenu(true)
