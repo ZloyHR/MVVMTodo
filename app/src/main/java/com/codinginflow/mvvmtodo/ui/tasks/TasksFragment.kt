@@ -18,6 +18,7 @@ import com.codinginflow.mvvmtodo.R
 import com.codinginflow.mvvmtodo.data.SortOrder
 import com.codinginflow.mvvmtodo.data.Task
 import com.codinginflow.mvvmtodo.databinding.FragmentTaskListBinding
+import com.codinginflow.mvvmtodo.ui.deleteconfirmationdialog.DeleteAllCompletedTaskDialogFragmentDirections
 import com.codinginflow.mvvmtodo.utils.exhaustive
 import com.codinginflow.mvvmtodo.utils.onQueryTextChanged
 import com.google.android.material.snackbar.Snackbar
@@ -87,6 +88,10 @@ class TasksFragment : Fragment(R.layout.fragment_task_list),TasksAdapter.OnItemC
                     is TasksViewModel.TasksEvent.ShowSavedMessage -> {
                         Snackbar.make(requireView(),event.msg,Snackbar.LENGTH_LONG).show()
                     }
+                    TasksViewModel.TasksEvent.NavigateToDeleteAllCompletedDialog -> {
+                        val action = DeleteAllCompletedTaskDialogFragmentDirections.actionGlobalDeleteAllCompletedTaskDialogFragment()
+                        findNavController().navigate(action)
+                    }
                 }.exhaustive
             }
         }
@@ -140,7 +145,7 @@ class TasksFragment : Fragment(R.layout.fragment_task_list),TasksAdapter.OnItemC
                 true
             }
             R.id.action_delete_completed_tasks -> {
-
+                viewModel.onDeleteAllCompleted()
                 true
             }
             else -> super.onOptionsItemSelected(item)
